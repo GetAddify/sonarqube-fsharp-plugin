@@ -1,5 +1,15 @@
 # Instructions to install and run SonarQube with F# security plugin
 
+## Compile sonar-fsharp-security-plugin
+
+Compilation instructions can be found in the [contributing-plugin.md](sonar-fsharp-security-plugin/docs/contributing-plugin.md) 
+of the original plugin. Compiling requires a recent Java + SDK and Maven installed.
+
+## How the plugin works
+
+See [how the plugin works](sonar-fsharp-security-plugin/docs/contributing-plugin.md).
+
+
 ## Install SonarQube
 
 Use the docker image named `sonarqube` from https://hub.docker.com/_/sonarqube/.
