@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="README.md" />
+    <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="Utilities.fs" />
+    <Compile Include="RuleDefinitionDto.fs" />
+    <Compile Include="ExportRuleDefinitions.fs" />
+    <Compile Include="ExportQualityProfile.fs" />
+    <Compile Include="AnalysisConfigDto.fs" />
+    <Compile Include="ImportExportAnalysisConfig.fs" />
+    <Compile Include="DiagnosticsDto.fs" />
+    <Compile Include="OutputDiagnostics.fs" />
+    <Compile Include="Program.fs">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Argu" Version="5.5.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
+    <PackageReference Include="Serilog.Sinks.File" Version="4.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SonarAnalyzer.FSharp\SonarAnalyzer.FSharp.fsproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="FSharp.Core" Version="4.7.0" />
+  </ItemGroup>
+
+</Project>
