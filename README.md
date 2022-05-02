@@ -1,5 +1,22 @@
 # Instructions to install and run SonarQube with F# security plugin
 
+## Prerequisites
+
+### To compile the project:
+
+* Windows, Linux or Mac
+* A recent Java JDK
+* Maven
+* Visual Studio 2019 or 2022 or Visual Studio Code
+* [.NET 6](https://dotnet.microsoft.com/en-us/download/dotnet/6.0) (comes with installing VS)
+* For Mac/Linux: [.NET Core 3.1](https://dotnet.microsoft.com/en-us/download/dotnet/3.1) (usually comes with installing VS)
+
+### To run:
+
+* Windows or Linux (Mac is currently not supported)
+* [.NET 6](https://dotnet.microsoft.com/en-us/download/dotnet/6.0)
+* [.NET Core 3.1](https://dotnet.microsoft.com/en-us/download/dotnet/3.1) (not included by default in prev. download, unless you install Visual Studio)
+
 ## Compile sonar-fsharp-security-plugin
 
 Compilation instructions can be found in the [contributing-plugin.md](sonar-fsharp-security-plugin/docs/contributing-plugin.md) 
