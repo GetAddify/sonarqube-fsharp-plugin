@@ -2,7 +2,8 @@ name: SonarQube Scan
 on:
   pull_request:
   push:
-    - main
+    branches:
+      - main
 
 jobs:
   sonarscan:
