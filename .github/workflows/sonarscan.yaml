@@ -1,0 +1,63 @@
+name: SonarQube Scan
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  sonarscan:
+    name: SonarQube Scan
+    runs-on: windows-latest
+    permissions:
+      id-token: write
+      contents: read
+      checks: write
+    steps:
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: 1.11
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+      # Authenticate with Vault and export any required secrets
+      - name: Auth Vault
+        id: secrets
+        uses: hashicorp/vault-action@v2.4.0
+        with:
+          url: https://vault.staging.stallions.dev
+          path: github-actions-oidc
+          method: jwt
+          role: github-actions-shared-cicd
+          jwtGithubAudience: https://github.com/Lula-Technologies-Inc
+          exportToken: true
+          secrets: cicd/data/github/personal-access-token secretariat | LULA_NUGET_TOKEN
+      - name: Cache SonarQube packages
+        uses: actions/cache@v1
+        with:
+          path: ~\sonar\cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+      - name: Cache SonarQube scanner
+        id: cache-sonar-scanner
+        uses: actions/cache@v1
+        with:
+          path: .\.sonar\scanner
+          key: ${{ runner.os }}-sonar-scanner
+          restore-keys: ${{ runner.os }}-sonar-scanner
+      - name: Install SonarQube scanner
+        # if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
+        shell: powershell
+        run: |
+          New-Item -Path .\.sonar\scanner -ItemType Directory
+          dotnet tool update dotnet-sonarscanner --tool-path .\.sonar\scanner
+      - name: Build and analyze
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+        shell: powershell
+        working-directory: sonar-fsharp-security-plugin/SonarAnalyzer.FSharp
+        run: |
+          ..\..\.sonar\scanner\dotnet-sonarscanner begin /k:"sonarqube-fsharp-plugin" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="${{ secrets.SONAR_HOST_URL }}"
+          dotnet build
+          ..\..\.sonar\scanner\dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
