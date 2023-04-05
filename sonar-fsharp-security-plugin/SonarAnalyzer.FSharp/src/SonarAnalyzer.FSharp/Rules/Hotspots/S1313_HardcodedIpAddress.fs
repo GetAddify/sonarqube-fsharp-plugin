@@ -14,80 +14,96 @@ module Private =
 
     [<Literal>]
     let DiagnosticId = "S1313"
+
     let messageFormat = "Make sure using this hardcoded IP address '{0}' is safe here."
-    let rule = DiagnosticDescriptor.Create(DiagnosticId, messageFormat, RspecStrings.ResourceManager)
+
+    let rule =
+        DiagnosticDescriptor.Create(DiagnosticId, messageFormat, RspecStrings.ResourceManager)
 
     exception EarlyReturn
 
     let checkWithEarlyReturn f node =
         try
             f node
-        with
-        | :? EarlyReturn ->
+        with :? EarlyReturn ->
             None
 
 
     let parseIpAddress str =
-        match System.Net.IPAddress.TryParse(str) with
-        | false,_ ->
-            None
-        | true, address ->
-            Some address
+        match System.Net.IPAddress.TryParse(str: string) with
+        | false, _ -> None
+        | true, address -> Some address
 
-    let isIp4Address (address:IPAddress) =
+    let isIp4Address (address: IPAddress) =
         address.AddressFamily = System.Net.Sockets.AddressFamily.InterNetwork
 
     let isValidIpAddress literalValue =
         option {
             let! address = parseIpAddress literalValue
-            if (isIp4Address address) &&
+
+            if
+                (isIp4Address address)
+                &&
                 // must have 4 parts
-                literalValue.Split('.').Length <> 4 then
+                literalValue.Split('.').Length <> 4
+            then
                 return false
             else
                 return true
-            // if address parsing fails, return false
-            } |> Option.defaultValue false
+        // if address parsing fails, return false
+        }
+        |> Option.defaultValue false
 
 
-    let ignoredNames = ["VERSION"; "ASSEMBLY"]
+    let ignoredNames = [ "VERSION"; "ASSEMBLY" ]
 
-    let isIgnoredMemberName (ctx:TastContext) =
+    let isIgnoredMemberName (ctx: TastContext) =
         option {
             // if there is a containing call, get it, else drop through and return false later
-            let! _,node = tryContainingCall ctx
+            let! _, node = tryContainingCall ctx
+
             let isContainedInMember name =
-                node.Member.CompiledName.ToUpperInvariant().Contains(name)
+                node.Member.CompiledName.ToUpperInvariant().Contains(name: string)
             // if any matches found, return true
             return ignoredNames |> List.exists isContainedInMember
-        } |> Option.defaultValue false
+        }
+        |> Option.defaultValue false
 
-    let isIgnoredClassName (ctx:TastContext) =
+    let isIgnoredClassName (ctx: TastContext) =
         option {
             // if there is a containing call, get it, else drop through and return false later
-            let! _,node = tryContainingNewObjectExpr ctx
+            let! _, node = tryContainingNewObjectExpr ctx
             let! entity = node.Ctor.DeclaringEntity
+
             let isContainedInClassName name =
-                entity.CompiledName.ToUpperInvariant().Contains(name)
+                entity.CompiledName.ToUpperInvariant().Contains(name: string)
             // if any matches found, return true
             return ignoredNames |> List.exists isContainedInClassName
-        } |> Option.defaultValue false
+        }
+        |> Option.defaultValue false
 
 
-    let checkNode (ctx:TastContext) (node:Tast.ConstantExpr) =
-        if node.Type |> isType WellKnownType.string |> not then raise EarlyReturn
+    let checkNode (ctx: TastContext) (node: Tast.ConstantExpr) =
+        if node.Type |> isType WellKnownType.string |> not then
+            raise EarlyReturn
 
         let literalValue = (string node.Value) // .Trim() // null is converted to "" by `string` so this is safe
         // Note Trim() is not used in the C# version
 
-        let allowedValues = [""; "::"; "127.0.0.1"]
-        if allowedValues |> List.contains literalValue then raise EarlyReturn
+        let allowedValues = [ ""; "::"; "127.0.0.1" ]
 
-        if not (isValidIpAddress literalValue) then raise EarlyReturn
+        if allowedValues |> List.contains literalValue then
+            raise EarlyReturn
+
+        if not (isValidIpAddress literalValue) then
+            raise EarlyReturn
 
         // check for ignored names such as "ASSEMBLY"
-        if isIgnoredClassName ctx then raise EarlyReturn
-        if isIgnoredMemberName ctx then raise EarlyReturn
+        if isIgnoredClassName ctx then
+            raise EarlyReturn
+
+        if isIgnoredMemberName ctx then
+            raise EarlyReturn
 
         // OK if used in an attribute
         // NB attributes are not normally visited in the AST. Must be asked for explicitly.
@@ -98,10 +114,9 @@ open Private
 
 /// The implementation of the rule
 [<Rule(DiagnosticId)>]
-let Rule : Rule = fun ctx ->
+let Rule: Rule =
+    fun ctx ->
 
-    // only trigger for constants
-    ctx.Try<Tast.ConstantExpr>()
-    |> Option.bind (checkWithEarlyReturn (checkNode ctx))
-
-
+        // only trigger for constants
+        ctx.Try<Tast.ConstantExpr>()
+        |> Option.bind (checkWithEarlyReturn (checkNode ctx))
