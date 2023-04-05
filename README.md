@@ -59,7 +59,7 @@ compiled and packaged with `mvn clean package` or `mvn package`.
 * Rename the file without version, i.e. rename it to `sonar-fsharpsecurity-plugin.jar`
 * Copy the file to the download directory of the docker image: 
     ```bash
-    docker cp sonar-fsharpsecurity-plugin.jar sonarqube:/opt/sonarqube/extensions/downloads`
+    docker cp sonar-fsharpsecurity-plugin.jar sonarqube:/opt/sonarqube/extensions/downloads
 	```
 * To verify that the file is in the download dir just go to the docker console and check, i.e.: 
     ```bash
