@@ -24,7 +24,7 @@ jobs:
       # Authenticate with Vault and export any required secrets
       - name: Auth Vault
         id: secrets
-        uses: hashicorp/vault-action@v2.4.0
+        uses: hashicorp/vault-action@v2.7.1
         with:
           url: https://vault.staging.stallions.dev
           path: github-actions-oidc
